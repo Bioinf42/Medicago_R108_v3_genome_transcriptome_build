@@ -147,19 +147,24 @@ Unzip the `Test_input.zip`
 unzip Test_input.zip
 ```
 
-Move into `Test_input`, in the reference directory unzip the `.gtf.zip` and `.fa.zip` files.
+Move into `Test_input/reference`, and unzip the `.gtf.zip` and `.fa.zip` files.
 
 ```bash
-cd Test_input
-unzip reference/R108_T2T.v3.0_fa.zip
-unzip reference/R108_T2T.v3.0_gtf.zip 
+cd Test_input/reference
+unzip R108_T2T.v3.0_fa.zip
+unzip R108_T2T.v3.0_gtf.zip 
+rm R108_T2T.v3.0_fa.zip
+rm R108_T2T.v3.0_gtf.zip
 ```
 
 Do not change directory. Move the reference and raw_data folders into `V3_T2T_R108_nodule_transcriptome/`
 
 ```bash
+cd ../
 mv raw_data ../
 mv reference ../
+cd ../
+rm -r Test_input Test_input.zip
 ```
 ---
 
