@@ -120,7 +120,7 @@ Follow these steps to install all required tools and to set up your environment 
 1. **Clone the repository**
     
 ```bash
-git clone https://github.com/Bioinf42/Medicago_R108_v3_genome_transcriptome_build.git
+git clone https://github.com/Bioinf42/V3_T2T_R108_nodule_transcriptome.git
 ```
 
 2. **Navigate to the base directory of the repository and make the scripts executable**
@@ -128,18 +128,39 @@ git clone https://github.com/Bioinf42/Medicago_R108_v3_genome_transcriptome_buil
 The directory name `V3_T2T_R108_nodule_transcriptome/`
      
 ```bash
+cd V3_T2T_R108_nodule_transcriptome
 chmod +x run_docker.sh
 chmod +x transcriptome_build_pipe.sh
 ```
 
-3. **Unzip the Genome `.fa` and annotation `.gtf` files**
+3. **Download the reference genome and annotation with test RNA data**
 
-These are provided in the reference directory or download from the links provided above. The pipeline requires a `.gtf`. The provided `.gtf` was converted from the authors `.gff3` using gffread. Check these files are in `reference/` if not move them into this directory. 
+Stay in the base directory and use wget command or download from browser. It is also provided in releases on the github repo page.
 
-4. **Input fastq files `.fq.gz`**
+```bash
+wget https://github.com/Bioinf42/V3_T2T_R108_nodule_transcriptome/releases/download/v0.3/Test_input.zip
+```
 
-Paired sample input `.fq.gz` files are provided, check these files are in `raw_data/` if not move them into this directory. 
+Unzip the `Test_input.zip` 
 
+```bash
+unzip Test_input.zip
+```
+
+Move into `Test_input`, in the reference directory unzip the `.gtf.zip` and `.fa.zip` files.
+
+```bash
+cd Test_input
+unzip reference/R108_T2T.v3.0_fa.zip
+unzip reference/R108_T2T.v3.0_gtf.zip 
+```
+
+Do not change directory. Move the reference and raw_data folders into `V3_T2T_R108_nodule_transcriptome/`
+
+```bash
+mv raw_data ../
+mv reference ../
+```
 ---
 
 ## Usage
