@@ -1,12 +1,10 @@
 markdown
-
-# *Medicago truncatula* R108 genome V3 T2T Nodule Transcriptome Pipeline 
+# *Medicago truncatula* V3 T2T R108 nodule transcriptome: tutorial & pipeline
 
 ---
 ## Overview
-This pipeline processes unstranded paired-end RNA-seq data to build a transcriptome for *Medicago truncatula* R108 root nodules, also reffered to as *Medicago littoralis*. 
-It performs quality control, trimming, alignment to the R108 V3 T2T reference genome, transcript assembly, merging, and comparison to the reference annotation, producing a comprehensive nodule transcriptome for downstream analysis. It provides it in a docker container
-to be used on any sytsem. 
+This pipeline processes unstranded paired-end RNA-seq data to build a transcriptome for *Medicago truncatula* R108 root nodules, also referred to as *Medicago littoralis*. 
+It performs quality control, trimming, alignment to the R108 V3 T2T reference genome, transcript assembly, merging, and comparison to the reference annotation, producing a comprehensive nodule transcriptome for downstream analysis. A filtering step is also included to remove lowly expressed transcripts. The pipeline is packaged in a Docker image for reproducibility and deployment ease. 
 
 ---
 ## Table of Contents
@@ -17,31 +15,30 @@ to be used on any sytsem.
 - [Installation](#installation)  
 - [Usage](#usage)  
 - [Outputs](#outputs)  
-- [Transcript Filtering](#transcript-filtering) 
 - [License](#license)  
 - [Citation](#citation) 
 
 ---
 ## Prerequisites
 - System: Linux (e.g., Ubuntu)
+- Docker 
 
 ### Software included (`env.yaml`)
-- 'Conda-forge' : Used to manage and download other software 
-- 'Python-3.11' : Custom merge and filtering script
-- 'Java (OpenJDK 11) : Required for Trimmomatic
-- 'fastqc_v0.12.1' : For quality control 
-- 'Trimmomatic-0.39' : For trimming and adaptor removal 
-- 'hisat2-2.2.1' : For alignment
-- 'samtools-1.18' : For BAM conversion and sorting
-- 'stringtie-3.0.0' : For transcript assembly
-- 'gffread-0.12.7' : For extracting transcript sequence
-- 'gffcompare-0.11.2' : To compare transcriptome gtf to original genome gtf
+- `Python-3.11` : Custom merge and filtering script
+- `Java (OpenJDK 11)` : Required for Trimmomatic
+- `fastqc_v0.12.1` : For quality control 
+- `Trimmomatic-0.39` : For trimming and adaptor removal 
+- `hisat2-2.2.1` : For alignment
+- `samtools-1.18` : For BAM conversion and sorting
+- `stringtie-3.0.0` : For transcript assembly
+- `gffread-0.12.7` : For extracting transcript sequence
+- `gffcompare-0.11.2` : To compare transcriptome gtf to original genome gtf
 
 ### Input Files:
 - Paired-end RNA FASTQ files (e.g., `SAMPLE_R1_001.fq.gz`, `SAMPLE_R2_001.fq.gz`)
 - Reference genome - "R108_T2T.v3.0.fa"
 (https://figshare.com/ndownloader/files/56630867)
-- Reference annotation - "R108_T2T.v3.0.gff"
+- Reference annotation - Downloaded "R108_T2T.v3.0.gff" then converted to "R108_T2T.v3.0.gtf" using gffread. The `.gtf` is provided which the pipeline uses.
 (https://figshare.com/ndownloader/articles/29665022/versions/3?folder_path=Medicago_gene_anno_newVersion)
 
 ### Hardware Recommendations 
@@ -66,9 +63,8 @@ to be used on any sytsem.
 The repository has the following structure upon download:
 
 ```bash
-Base/
+V3_T2T_R108_nodule_transcriptome/
 ├── docker/
-│   ├── work/
 │   ├── Dockerfile
 │   └── env.yaml
 ├── filtering_scripts/
@@ -87,9 +83,8 @@ Base/
 The repository after running the pipeline:
 
 ```bash
-Base/
+V3_T2T_R108_nodule_transcriptome/
 ├── docker/
-│   ├── work/
 │   ├── Dockerfile
 │   └── env.yaml
 ├── filtering_scripts/
@@ -98,9 +93,7 @@ Base/
 ├── raw_data/
 ├── reference/
 │    ├── R108_T2T.v3.0.fa
-│    ├── R108_T2T.v3.0.gtf
-│    ├── R108_T2T.v3.0.exon.txt
-│    └── R108_T2T.v3.0.splicesite.txt
+│    └──  R108_T2T.v3.0.gtf
 ├── run_docker.sh
 ├── transcriptome_build_pipe.sh
 ├── README.md  
@@ -120,8 +113,6 @@ Base/
     └── final_gtf/
         └── gff_final_compare/
 ```
-
-
 ---
 ## Installation
 Follow these steps to install all required tools and to set up your environment before running the pipeline.
@@ -129,33 +120,43 @@ Follow these steps to install all required tools and to set up your environment 
 1. **Clone the repository**
     
 ```bash
-git clone https://github.com/yourusername/R108_Nodule_tx_Git.git
+git clone https://github.com/Bioinf42/Medicago_R108_v3_genome_transcriptome_build.git
 ```
 
 2. **Navigate to the base directory of the repository and make the scripts executable**
+
+The directory name `V3_T2T_R108_nodule_transcriptome/`
      
 ```bash
 chmod +x run_docker.sh
-chmod +x rtranscriptome_build_pipe.sh
+chmod +x transcriptome_build_pipe.sh
 ```
 
 3. **Unzip the Genome `.fa` and annotation `.gtf` files**
 
-These are provided in the reference directory. Or download from the links provided above, using gffread tool`.gtf` was produced from `.gff3` file provided by paper authors.
-Only a gtf file will work with this pipeline.  
+These are provided in the reference directory or download from the links provided above. The pipeline requires a `.gtf`. The provided `.gtf` was converted from the authors `.gff3` using gffread. Check these files are in `reference/` if not move them into this directory. 
 
+4. **Input fastq files `.fq.gz`**
 
+Paired sample input `.fq.gz` files are provided, check these files are in `raw_data/` if not move them into this directory. 
 
-1. **Run the respository**
+---
 
-Stay in the base directory and run the two commands seperately. Check your system and run the second command with the appropriate number of threads. Reccomend to use 1-2 threads less than 
+## Usage
+1. **Run the repository**
+Stay in the base directory `V3_T2T_R108_nodule_transcriptome/` and run the two commands separately. Check your system and run the second command with the appropriate number of threads. Recommend to use 1-2 threads less than 
 the system has. 
-    
+
+Build the docker image:
 ```bash
 docker build --no-cache -t txpipe:0.3 -f docker/Dockerfile .
-STEP=all THREADS=14 IMAGE=txpipe:0.3 ./run_docker.sh
-
 ```
+Run the pipeline:
+```bash
+STEP=all THREADS=14 IMAGE=txpipe:0.3 ./run_docker.sh
+```
+
+The directory and file with the final output gtf is `results/final_gtf/R108_merged_nodule_filtered.gtf`
 
 ---
 ## Outputs
@@ -175,7 +176,6 @@ per-base quality, over-represented sequences, adapter contamination. A quick pri
   Paired vs. unpaired? Trimmomatic processes each read independently; if trimming pushes one mate below the `MINLEN` threshold (50 nt here) that read is dropped while its partner is kept. 
   ‘*Paired*’ files therefore contain read pairs that both survived; ‘*unpaired*’ files hold the few orphan reads that survived alone. Down-stream aligners only use the *paired* files.
 
-
 3. **fastqc_trimmed**: HTML & `.zip` reports of the trimmed data, sequence quality should be higher and adaptors should now be removed. 
 
 4. **index**: Contains the HISAT2 genome index files (*.ht2) built from the reference FASTA (and splice/exon information from the GTF). These files are required for fast RNA-seq alignment
@@ -183,10 +183,32 @@ and are reused across runs.
 
 5. **aligned_bam**:  One `.sorted.bam` and `.sorted.bam.bai` per sample, this is a compressed `.sam` file converted into binary coordinate-sorted and indexed. These are the files that are used by StringTie; you can view them in IGV.
 6. **stringtie_counts**: Per-sample abundance tables (`*_counts.tab`). Expression estimates (FPKM, TPM, read counts) for every transcript feature in the matching GTF
-7. **stringtie_transcript**: a GTF is produced per sample. Each file lists all transcript models assembled from that sample alone.
+7. **stringtie_transcripts**: a GTF is produced per sample. Each file lists all transcript models assembled from that sample alone.
 8. **stringtie_merged**: individual GTF files were merged producing a initial transcriptome outputting the file `R108_merged_nodule.gtf`.
-9. **gtf_compare**: Has the output of the comparison of the generated transcriptome annotation `R108_merged_nodule.gtf` to the original genome annoation `R108_T2T.v3.0.fa`
-10. **stringtie_filtered**: BAM files were realigned using the generated transcriptome annoation `R108_merged_nodule.gtf`. Python scripts provided create a matrix from the expresson values for each sample and then produce `pass_tx.txt` with genes that pass the low expression filter. 
-11. **final_gtf**: The generated transcriptome annotation `R108_merged_nodule.gtf` has its low level transcripts and isoforms removed generating `R108_merged_nodule_filtered.gtf`. It also contains the folder `gff_final_compare/` which compares this final annoation to the original genome annoation. 
+9. **gtf_compare**: Has the output of the comparison of the generated transcriptome annotation `R108_merged_nodule.gtf` to the original genome annotation `R108_T2T.v3.0.gtf`
+10. **stringtie_filtered**: BAM files were reused to estimate expression using the generated transcriptome annotation `R108_merged_nodule.gtf`. Python scripts provided create a matrix from the expression values for each sample and then produce `pass_tx.txt` with genes that pass the low expression filter. 
+11. **final_gtf**: The generated transcriptome annotation `R108_merged_nodule.gtf` has its low level transcripts and isoforms removed generating `R108_merged_nodule_filtered.gtf`. It also contains the folder `gff_final_compare/` which compares this final annotation to the original genome annotation. 
 
-```
+## License
+
+- **Code**: MIT License © 2025 <Matthew Jolly>. See `LICENSE`.
+- **Text/docs/figures in this repo**: Creative Commons Attribution 4.0 International (**CC BY 4.0**).
+- **Third-party tools and external genomes/annotations/data** remain under their own licenses/terms; follow the providers’ terms.
+
+## Citation
+
+**This repository**
+- Matthew Jolly (Gifford Lab, University of Warwick). *Medicago truncatula V3 T2T R108 nodule transcriptome: tutorial & pipeline*. GitHub, `v0.1.0` (2025)
+
+**Software**
+
+- 'fastqc_v0.12.1' : Andrews S. (2010) FastQC: A Quality Control Tool for High Throughput Sequence Data
+- 'Trimmomatic-0.39' : Bolger AM, Lohse M, Usadel B. Trimmomatic: a flexible trimmer for Illumina sequence data. Bioinformatics. 2014;30(15):2114-2120. doi:10.1093/bioinformatics/btu170
+- 'hisat2-2.2.1' : Kim D, Paggi JM, Park C, Bennett C, Salzberg SL. Graph-based genome alignment and genotyping with HISAT2 and HISAT-genotype. Nat Biotechnol. 2019;37(8):907-915. doi:10.1038/s41587-019-0201-4
+- 'samtools-1.18' : Li H, Handsaker B, Wysoker A, et al. The Sequence Alignment/Map format and SAMtools. Bioinformatics. 2009;25(16):2078-2079. doi:10.1093/bioinformatics/btp352
+- 'stringtie-3.0.0' : Pertea M, Pertea GM, Antonescu CM, Chang TC, Mendell JT, Salzberg SL. StringTie enables improved reconstruction of a transcriptome from RNA-seq reads. Nat Biotechnol. 2015;33(3):290-295. doi:10.1038/nbt.3122
+- 'gffread-0.12.7' : Pertea G, Pertea M. GFF Utilities: GffRead and GffCompare. F1000Res. 2020;9:ISCB Comm J-304. Published 2020 Apr 28. doi:10.12688/f1000research.23297.2
+
+**Genome and Annotation**
+
+- Shen L, Yi C, Liu Y, Han F, Feng J. Two complete telomere-to-telomere genome assemblies of Medicago reveal the landscape and evolution of its centromeres. Molecular Plant. 2025;18(9):1409-12. https://doi.org/10.1016/j.molp.2025.07.016
